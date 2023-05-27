@@ -1,53 +1,63 @@
 package controller
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
+	models "github.com/yigitalpkilavuz/casino_wallet/models"
 	service "github.com/yigitalpkilavuz/casino_wallet/services"
 )
 
-type WalletController interface {
-	Authenticate(ctx *gin.Context)
-	Balance(ctx *gin.Context)
-	Credit(ctx *gin.Context)
-	Debit(ctx *gin.Context)
+type WalletController struct {
+	walletService service.WalletService
 }
 
-type walletController struct {
-	walletService      service.WalletService
-	transactionService service.TransactionService
-}
-
-func NewWalletController(walletService service.WalletService, transactionService service.TransactionService) WalletController {
-	return &walletController{
-		walletService:      walletService,
-		transactionService: transactionService,
+func NewWalletController(walletService service.WalletService) WalletController {
+	return WalletController{
+		walletService: walletService,
 	}
 }
 
-func (c *walletController) Authenticate(ctx *gin.Context) {
-	fmt.Print("test")
-	ctx.JSON(200, gin.H{
-		"message": "OK",
-	})
-}
-
-func (c *walletController) Balance(ctx *gin.Context) {
-	response, err := c.walletService.Find(1)
-	if err != nil {
-		ctx.JSON(200, gin.H{
-			"error": err,
-		})
+func (c *WalletController) Authenticate(ctx *gin.Context) {
+	req := models.AuthenticateRequest{}
+	ctx.BindJSON(&req)
+	response, err := c.walletService.Authenticate(req)
+	if err.Status > 0 {
+		ctx.JSON(200, err)
+	} else {
+		ctx.JSON(200, response)
 	}
-	ctx.JSON(200, gin.H{
-		"balance": response.Balance,
-	})
+}
+
+func (c *WalletController) Balance(ctx *gin.Context) {
+	walletId := ctx.Param("wallet_id")
+	response, err := c.walletService.Balance(walletId)
+	if err.Status > 0 {
+		ctx.JSON(200, err)
+	} else {
+		ctx.JSON(200, response)
+	}
 
 }
 
-func (c *walletController) Credit(ctx *gin.Context) {
+func (c *WalletController) Credit(ctx *gin.Context) {
+	req := models.TransactionRequest{}
+	ctx.BindJSON(&req)
+	req.WalletId = ctx.Param("wallet_id")
+	response, err := c.walletService.Credit(req)
+	if err.Status > 0 {
+		ctx.JSON(200, err)
+	} else {
+		ctx.JSON(200, response)
+	}
 }
 
-func (c *walletController) Debit(ctx *gin.Context) {
+func (c *WalletController) Debit(ctx *gin.Context) {
+	req := models.TransactionRequest{}
+	ctx.BindJSON(&req)
+	req.WalletId = ctx.Param("wallet_id")
+	response, err := c.walletService.Debit(req)
+	if err.Status > 0 {
+		ctx.JSON(200, err)
+	} else {
+		ctx.JSON(200, response)
+	}
 }

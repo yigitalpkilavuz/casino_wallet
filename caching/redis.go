@@ -14,14 +14,12 @@ type RedisService struct {
 }
 
 func NewRedisService() *RedisService {
-	// Create a new Redis client
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis server address
-		Password: "",               // Redis password, if any
-		DB:       0,                // Redis database index
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 
-	// Ping the Redis server to check if it's running
 	pong, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		log.Fatal(err)

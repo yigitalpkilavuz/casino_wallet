@@ -1,4 +1,4 @@
-package conf
+package config
 
 import "github.com/spf13/viper"
 
@@ -8,21 +8,19 @@ type Config struct {
 		Host string `mapstructure:"host"`
 	} `mapstructure:"server"`
 	Database struct {
-		Host     string `mapstructure:"host"`
-		Port     string `mapstructure:"port"`
-		Username string `mapstructure:"username"`
-		Password string `mapstructure:"password"`
+		StorageType      string `mapstructure:"storageType"`
+		ConnectionString string `mapstructure:"connectionString"`
 	} `mapstructure:"database"`
 }
 
 var vp *viper.Viper
 
-func GetConfig() (Config, error) {
+func InitConfig() (Config, error) {
 	vp = viper.New()
 	var config Config
 	vp.SetConfigName("config")
 	vp.SetConfigType("json")
-	vp.AddConfigPath("./conf")
+	vp.AddConfigPath("./config")
 
 	err := vp.ReadInConfig()
 
@@ -37,4 +35,8 @@ func GetConfig() (Config, error) {
 	}
 
 	return config, nil
+}
+
+func GetConfig(key string) string {
+	return vp.GetString(key)
 }

@@ -2,41 +2,80 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	controller "github.com/yigitalpkilavuz/casino_wallet/api/controllers"
-	conf "github.com/yigitalpkilavuz/casino_wallet/conf"
+	middleware "github.com/yigitalpkilavuz/casino_wallet/api/middlewares"
+	config "github.com/yigitalpkilavuz/casino_wallet/config"
+	storage "github.com/yigitalpkilavuz/casino_wallet/database"
+	repository "github.com/yigitalpkilavuz/casino_wallet/repositories"
 	service "github.com/yigitalpkilavuz/casino_wallet/services"
 )
 
-var (
-	walletService      service.WalletService       = service.NewUserService()
-	transactionService service.TransactionService  = service.NewTransactionService()
-	walletController   controller.WalletController = controller.NewWalletController(walletService, transactionService)
-)
+type App struct {
+	Config                config.Config
+	BaseRepository        repository.BaseRepository
+	WalletRepository      repository.WalletRepository
+	TransactionRepository repository.TransactionRepository
+	BaseService           service.BaseService
+	WalletService         service.WalletService
+	WalletController      controller.WalletController
+}
 
-func main() {
-
-	config, err := conf.GetConfig()
-
+func NewApp() *App {
+	config, err := config.InitConfig()
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println(config)
 	}
 
+	db, err := storage.InitDatabase(config.Database.StorageType, config.Database.ConnectionString)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
+	err = storage.RunMigrations(db)
+	if err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
+	baseRepository := repository.NewBaseRepository(db)
+	walletRepository := repository.NewWalletRepository(baseRepository)
+	transactionRepository := repository.NewTransactionRepository(baseRepository)
+	baseService := service.NewBaseService(walletRepository, transactionRepository)
+	walletService := service.NewWalletService(baseService)
+	walletController := controller.NewWalletController(walletService)
+
+	return &App{
+		Config:                config,
+		BaseRepository:        baseRepository,
+		WalletRepository:      walletRepository,
+		TransactionRepository: transactionRepository,
+		BaseService:           baseService,
+		WalletService:         walletService,
+		WalletController:      walletController,
+	}
+}
+
+func (app *App) Start() {
 	server := gin.Default()
-	// server.Use(middleware.ErrorMiddleware())
-	// server.Use(middleware.LoggerMiddleware())
 	v1 := server.Group("api/v1")
-	AddRoutes(v1)
+	app.addRoutes(v1)
 	server.Run(":8080")
 }
 
-func AddRoutes(rg *gin.RouterGroup) {
+func (app *App) addRoutes(rg *gin.RouterGroup) {
 	wallet := rg.Group("/wallet")
-	wallet.GET("/:wallet_id/authenticate", walletController.Authenticate)
-	wallet.GET("/:wallet_id/balance", walletController.Balance)
-	wallet.POST("/:wallet_id/credit", walletController.Credit)
-	wallet.GET("/:wallet_id/debit", walletController.Debit)
+	wallet.Use(middleware.ErrorMiddleware())
+	wallet.Use(middleware.LoggerMiddleware())
+	wallet.Use(middleware.AuthMiddleware())
+	wallet.POST("/authenticate", app.WalletController.Authenticate)
+	wallet.GET("/:wallet_id/balance", app.WalletController.Balance)
+	wallet.POST("/:wallet_id/credit", app.WalletController.Credit)
+	wallet.POST("/:wallet_id/debit", app.WalletController.Debit)
+}
+
+func main() {
+	app := NewApp()
+	app.Start()
 }
