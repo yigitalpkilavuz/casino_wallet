@@ -5,16 +5,19 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	controller "github.com/yigitalpkilavuz/casino_wallet/api/controllers"
 	middleware "github.com/yigitalpkilavuz/casino_wallet/api/middlewares"
 	config "github.com/yigitalpkilavuz/casino_wallet/config"
 	storage "github.com/yigitalpkilavuz/casino_wallet/database"
+	logger "github.com/yigitalpkilavuz/casino_wallet/log"
 	repository "github.com/yigitalpkilavuz/casino_wallet/repositories"
 	service "github.com/yigitalpkilavuz/casino_wallet/services"
 )
 
 type App struct {
 	Config                config.Config
+	Logger                *logrus.Logger
 	BaseRepository        repository.BaseRepository
 	WalletRepository      repository.WalletRepository
 	TransactionRepository repository.TransactionRepository
@@ -28,6 +31,8 @@ func NewApp() *App {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	logger := logger.NewLogger()
 
 	db, err := storage.InitDatabase(config.Database.StorageType, config.Database.ConnectionString)
 	if err != nil {
@@ -48,6 +53,7 @@ func NewApp() *App {
 
 	return &App{
 		Config:                config,
+		Logger:                logger,
 		BaseRepository:        baseRepository,
 		WalletRepository:      walletRepository,
 		TransactionRepository: transactionRepository,
@@ -67,7 +73,7 @@ func (app *App) Start() {
 func (app *App) addRoutes(rg *gin.RouterGroup) {
 	wallet := rg.Group("/wallet")
 	wallet.Use(middleware.ErrorMiddleware())
-	wallet.Use(middleware.LoggerMiddleware())
+	wallet.Use(middleware.LoggerMiddleware(app.Logger))
 	wallet.Use(middleware.AuthMiddleware())
 	wallet.POST("/authenticate", app.WalletController.Authenticate)
 	wallet.GET("/:wallet_id/balance", app.WalletController.Balance)
