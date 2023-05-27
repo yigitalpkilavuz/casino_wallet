@@ -6,6 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type IBaseRepository interface {
+	Get(id string, out interface{}) error
+	Create(data interface{}) error
+	Update(id string, data interface{}) error
+	Delete(id string, model interface{}) error
+}
+
 type BaseRepository struct {
 	db *gorm.DB
 }

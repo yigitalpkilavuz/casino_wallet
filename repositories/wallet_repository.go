@@ -2,6 +2,9 @@ package repository
 
 import entity "github.com/yigitalpkilavuz/casino_wallet/database/entities"
 
+type IWalletRepository interface {
+	GetWalletByUsername(username string) (entity.Wallet, error)
+}
 type WalletRepository struct {
 	BaseRepository
 }

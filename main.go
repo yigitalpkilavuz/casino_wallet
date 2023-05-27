@@ -72,7 +72,7 @@ func (app *App) Start() {
 
 func (app *App) addRoutes(rg *gin.RouterGroup) {
 	wallet := rg.Group("/wallet")
-	wallet.Use(middleware.ErrorMiddleware())
+	wallet.Use(middleware.ErrorMiddleware(app.Logger))
 	wallet.Use(middleware.LoggerMiddleware(app.Logger))
 	wallet.Use(middleware.AuthMiddleware())
 	wallet.POST("/authenticate", app.WalletController.Authenticate)

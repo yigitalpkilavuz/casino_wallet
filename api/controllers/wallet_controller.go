@@ -21,7 +21,7 @@ func (c *WalletController) Authenticate(ctx *gin.Context) {
 	ctx.BindJSON(&req)
 	response, err := c.walletService.Authenticate(req)
 	if err.Status > 0 {
-		ctx.JSON(200, err)
+		ctx.JSON(err.Status, err)
 	} else {
 		ctx.JSON(200, response)
 	}
@@ -31,7 +31,7 @@ func (c *WalletController) Balance(ctx *gin.Context) {
 	walletId := ctx.Param("wallet_id")
 	response, err := c.walletService.Balance(walletId)
 	if err.Status > 0 {
-		ctx.JSON(200, err)
+		ctx.JSON(err.Status, err)
 	} else {
 		ctx.JSON(200, response)
 	}
@@ -44,7 +44,7 @@ func (c *WalletController) Credit(ctx *gin.Context) {
 	req.WalletId = ctx.Param("wallet_id")
 	response, err := c.walletService.Credit(req)
 	if err.Status > 0 {
-		ctx.JSON(200, err)
+		ctx.JSON(err.Status, err)
 	} else {
 		ctx.JSON(200, response)
 	}
@@ -56,7 +56,7 @@ func (c *WalletController) Debit(ctx *gin.Context) {
 	req.WalletId = ctx.Param("wallet_id")
 	response, err := c.walletService.Debit(req)
 	if err.Status > 0 {
-		ctx.JSON(200, err)
+		ctx.JSON(err.Status, err)
 	} else {
 		ctx.JSON(200, response)
 	}
