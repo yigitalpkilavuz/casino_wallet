@@ -8,11 +8,11 @@ import (
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		if len(c.Errors) > 0 {
-			logrus.Errorf("Error processing request: %v", c.Errors)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+	return func(ctx *gin.Context) {
+		ctx.Next()
+		if len(ctx.Errors) > 0 {
+			logrus.Errorf("Error processing request: %v", ctx.Errors)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 	}
 }

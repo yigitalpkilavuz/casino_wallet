@@ -4,10 +4,9 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/yigitalpkilavuz/casino_wallet/config"
 )
 
-var jwtKey = []byte(config.GetConfig(""))
+var jwtKey = []byte("test-key")
 
 type Claims struct {
 	Username string `json:"username"`

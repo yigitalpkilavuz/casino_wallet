@@ -6,10 +6,10 @@ import (
 )
 
 func LoggerMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		logrus.Infof("Incoming request: %s %s", c.Request.Method, c.Request.URL)
-		c.Next()
-		statusCode := c.Writer.Status()
-		logrus.Infof("Response: %s %s %d", c.Request.Method, c.Request.URL, statusCode)
+	return func(ctx *gin.Context) {
+		logrus.Infof("Incoming request: %s %s", ctx.Request.Method, ctx.Request.URL)
+		ctx.Next()
+		statusCode := ctx.Writer.Status()
+		logrus.Infof("Response: %s %s %d", ctx.Request.Method, ctx.Request.URL, statusCode)
 	}
 }

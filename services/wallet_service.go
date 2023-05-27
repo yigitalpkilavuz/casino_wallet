@@ -7,7 +7,6 @@ import (
 	auth "github.com/yigitalpkilavuz/casino_wallet/auth"
 	entity "github.com/yigitalpkilavuz/casino_wallet/database/entities"
 	model "github.com/yigitalpkilavuz/casino_wallet/models"
-	models "github.com/yigitalpkilavuz/casino_wallet/models"
 )
 
 type WalletService struct {
@@ -20,50 +19,50 @@ func NewWalletService(baseService BaseService) WalletService {
 	}
 }
 
-func (service *WalletService) Authenticate(req models.AuthenticateRequest) (models.AuthenticateResponse, models.ErrorResponse) {
+func (service *WalletService) Authenticate(req model.AuthenticateRequest) (model.AuthenticateResponse, model.ErrorResponse) {
 	wallet, err := service.BaseService.walletRepository.GetWalletByUsername(req.Username)
 	if err != nil {
-		return models.AuthenticateResponse{}, ErrorResponse(500, "Something went wrong while finding wallet", err.Error())
+		return model.AuthenticateResponse{}, ErrorResponse(422, "Something went wrong while finding wallet", err.Error())
 	}
 
 	if wallet.Password == req.Password {
 		token, err := auth.CreateToken(req.Username)
 		if err != nil {
 
-			return models.AuthenticateResponse{}, ErrorResponse(500, "Could not generate token", err.Error())
+			return model.AuthenticateResponse{}, ErrorResponse(500, "Could not generate token", err.Error())
 		}
-		return models.AuthenticateResponse{
+		return model.AuthenticateResponse{
 			Username: wallet.Username,
 			Balance:  wallet.Balance,
 			Token:    token,
-		}, models.ErrorResponse{}
+		}, model.ErrorResponse{}
 	}
-	return models.AuthenticateResponse{}, ErrorResponse(401, "Invalid Credentials", err.Error())
+	return model.AuthenticateResponse{}, ErrorResponse(401, "Invalid Credentials", err.Error())
 }
 
-func (service *WalletService) Balance(id string) (models.BalanceResponse, models.ErrorResponse) {
+func (service *WalletService) Balance(id string) (model.BalanceResponse, model.ErrorResponse) {
 	wallet := entity.Wallet{}
 	err := service.BaseService.walletRepository.Get(id, &wallet)
 	if err != nil {
-		return models.BalanceResponse{}, ErrorResponse(500, "Something went wrong while finding wallet", err.Error())
+		return model.BalanceResponse{}, ErrorResponse(422, "Something went wrong while finding wallet", err.Error())
 	}
-	return models.BalanceResponse{
+	return model.BalanceResponse{
 		Username: wallet.Username,
 		Balance:  wallet.Balance,
-	}, models.ErrorResponse{}
+	}, model.ErrorResponse{}
 }
 
-func (service *WalletService) Credit(req model.TransactionRequest) (models.TransactionResponse, model.ErrorResponse) {
+func (service *WalletService) Credit(req model.TransactionRequest) (model.TransactionResponse, model.ErrorResponse) {
 	transactionType := "credit"
 	wallet := entity.Wallet{}
 	err := service.BaseService.walletRepository.Get(req.WalletId, &wallet)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while finding wallet", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while finding wallet", err.Error())
 	}
 
 	err = service.changeBalance(&wallet, req.Amount, transactionType)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while updating balance", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while updating balance", err.Error())
 	}
 
 	transaction := entity.Transaction{
@@ -74,14 +73,14 @@ func (service *WalletService) Credit(req model.TransactionRequest) (models.Trans
 
 	err = service.BaseService.walletRepository.Create(&transaction)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while updating balance", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while updating balance", err.Error())
 	}
 
-	return models.TransactionResponse{
+	return model.TransactionResponse{
 		Username:      wallet.Username,
 		Balance:       wallet.Balance,
 		TransactionID: transaction.ID,
-	}, models.ErrorResponse{}
+	}, model.ErrorResponse{}
 }
 
 func (service *WalletService) Debit(req model.TransactionRequest) (model.TransactionResponse, model.ErrorResponse) {
@@ -89,12 +88,15 @@ func (service *WalletService) Debit(req model.TransactionRequest) (model.Transac
 	wallet := entity.Wallet{}
 	err := service.BaseService.walletRepository.Get(req.WalletId, &wallet)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while finding wallet", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while finding wallet", err.Error())
 	}
 
+	if wallet.Balance.LessThan(req.Amount) {
+		return model.TransactionResponse{}, ErrorResponse(403, "Insufficent funds", "")
+	}
 	err = service.changeBalance(&wallet, req.Amount, transactionType)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while updating balance", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while updating balance", err.Error())
 	}
 
 	transaction := entity.Transaction{
@@ -105,14 +107,14 @@ func (service *WalletService) Debit(req model.TransactionRequest) (model.Transac
 
 	err = service.BaseService.walletRepository.Create(&transaction)
 	if err != nil {
-		return models.TransactionResponse{}, ErrorResponse(500, "Something went wrong while updating balance", err.Error())
+		return model.TransactionResponse{}, ErrorResponse(422, "Something went wrong while updating balance", err.Error())
 	}
 
-	return models.TransactionResponse{
+	return model.TransactionResponse{
 		Username:      wallet.Username,
 		Balance:       wallet.Balance,
 		TransactionID: transaction.ID,
-	}, models.ErrorResponse{}
+	}, model.ErrorResponse{}
 }
 
 func (service *WalletService) changeBalance(wallet *entity.Wallet, amount decimal.Decimal, transaction string) error {

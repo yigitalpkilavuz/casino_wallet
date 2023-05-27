@@ -11,6 +11,9 @@ type Config struct {
 		StorageType      string `mapstructure:"storageType"`
 		ConnectionString string `mapstructure:"connectionString"`
 	} `mapstructure:"database"`
+	Authorization struct {
+		JwtKey string `mapstructure:"jwtKey"`
+	} `mapstructure:"authorization"`
 }
 
 var vp *viper.Viper
