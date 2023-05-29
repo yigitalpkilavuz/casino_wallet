@@ -6,11 +6,11 @@ import (
 )
 
 type BaseService struct {
-	walletRepository   repository.WalletRepository
+	walletRepository   repository.IWalletRepository
 	transactionService repository.TransactionRepository
 }
 
-func NewBaseService(wallet repository.WalletRepository, transaction repository.TransactionRepository) BaseService {
+func NewBaseService(wallet repository.IWalletRepository, transaction repository.TransactionRepository) BaseService {
 	return BaseService{
 		walletRepository:   wallet,
 		transactionService: transaction,

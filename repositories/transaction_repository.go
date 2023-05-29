@@ -1,6 +1,7 @@
 package repository
 
 type ITransactionRepository interface {
+	IBaseRepository
 }
 
 type TransactionRepository struct {

@@ -16,6 +16,7 @@ func NewWalletController(walletService service.IWalletService) WalletController 
 	}
 }
 
+// Authenticate function handles the authentication requests
 func (c *WalletController) Authenticate(ctx *gin.Context) {
 	req := models.AuthenticateRequest{}
 	ctx.BindJSON(&req)
@@ -27,6 +28,7 @@ func (c *WalletController) Authenticate(ctx *gin.Context) {
 	}
 }
 
+// Balance function handles the balance check requests
 func (c *WalletController) Balance(ctx *gin.Context) {
 	walletId := ctx.Param("wallet_id")
 	response, err := c.walletService.Balance(walletId)
@@ -38,6 +40,7 @@ func (c *WalletController) Balance(ctx *gin.Context) {
 
 }
 
+// Credit function handles the credit requests
 func (c *WalletController) Credit(ctx *gin.Context) {
 	req := models.TransactionRequest{}
 	ctx.BindJSON(&req)
@@ -50,6 +53,7 @@ func (c *WalletController) Credit(ctx *gin.Context) {
 	}
 }
 
+// Debit function handles the debit requests
 func (c *WalletController) Debit(ctx *gin.Context) {
 	req := models.TransactionRequest{}
 	ctx.BindJSON(&req)

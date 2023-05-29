@@ -6,6 +6,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+type IAuth interface {
+	CreateToken(username string) (string, error)
+}
+
 var jwtKey = []byte("test-key")
 
 type Claims struct {
