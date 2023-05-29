@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	controller "github.com/yigitalpkilavuz/casino_wallet/api/controllers"
 	middleware "github.com/yigitalpkilavuz/casino_wallet/api/middlewares"
+	"github.com/yigitalpkilavuz/casino_wallet/caching"
 	config "github.com/yigitalpkilavuz/casino_wallet/config"
 	storage "github.com/yigitalpkilavuz/casino_wallet/database"
 	logger "github.com/yigitalpkilavuz/casino_wallet/log"
@@ -22,6 +23,7 @@ type App struct {
 	WalletRepository      repository.WalletRepository
 	TransactionRepository repository.TransactionRepository
 	BaseService           service.BaseService
+	RedisService          caching.RedisService
 	WalletService         service.WalletService
 	WalletController      controller.WalletController
 }
@@ -48,7 +50,8 @@ func NewApp() *App {
 	walletRepository := repository.NewWalletRepository(baseRepository)
 	transactionRepository := repository.NewTransactionRepository(baseRepository)
 	baseService := service.NewBaseService(walletRepository, transactionRepository)
-	walletService := service.NewWalletService(baseService)
+	redisService := caching.NewRedisService(config)
+	walletService := service.NewWalletService(baseService, redisService, logger)
 	walletController := controller.NewWalletController(walletService)
 
 	return &App{
@@ -58,6 +61,7 @@ func NewApp() *App {
 		WalletRepository:      walletRepository,
 		TransactionRepository: transactionRepository,
 		BaseService:           baseService,
+		RedisService:          redisService,
 		WalletService:         walletService,
 		WalletController:      walletController,
 	}

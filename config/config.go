@@ -11,6 +11,11 @@ type Config struct {
 		StorageType      string `mapstructure:"storageType"`
 		ConnectionString string `mapstructure:"connectionString"`
 	} `mapstructure:"database"`
+	Redis struct {
+		Host     string `mapstructure:"host"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+	} `mapstructure:"redis"`
 	Authorization struct {
 		JwtKey string `mapstructure:"jwtKey"`
 	} `mapstructure:"authorization"`

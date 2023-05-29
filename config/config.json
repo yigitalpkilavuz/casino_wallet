@@ -5,7 +5,12 @@
   },
   "database": {
     "storageType" : "mysql",
-    "connectionString": "root:123456@tcp(127.0.0.1:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local"
+    "connectionString": "root:password@tcp(mysql:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local"
+  },
+  "redis" :{
+    "host": "redis",
+    "Password": "",
+    "db": 0
   },
   "authorization":{
     "jwtKey" : "test"

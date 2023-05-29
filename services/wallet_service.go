@@ -1,21 +1,29 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/shopspring/decimal"
+	"github.com/sirupsen/logrus"
 	auth "github.com/yigitalpkilavuz/casino_wallet/auth"
+	"github.com/yigitalpkilavuz/casino_wallet/caching"
 	entity "github.com/yigitalpkilavuz/casino_wallet/database/entities"
 	model "github.com/yigitalpkilavuz/casino_wallet/models"
 )
 
 type WalletService struct {
 	BaseService
+	RedisService caching.RedisService
+	Logger       *logrus.Logger
 }
 
-func NewWalletService(baseService BaseService) WalletService {
+func NewWalletService(baseService BaseService, redisService caching.RedisService, logger *logrus.Logger) WalletService {
 	return WalletService{
-		BaseService: baseService,
+		BaseService:  baseService,
+		RedisService: redisService,
+		Logger:       logger,
 	}
 }
 
@@ -28,7 +36,6 @@ func (service *WalletService) Authenticate(req model.AuthenticateRequest) (model
 	if wallet.Password == req.Password {
 		token, err := auth.CreateToken(req.Username)
 		if err != nil {
-
 			return model.AuthenticateResponse{}, ErrorResponse(500, "Could not generate token", err.Error())
 		}
 		return model.AuthenticateResponse{
@@ -37,6 +44,8 @@ func (service *WalletService) Authenticate(req model.AuthenticateRequest) (model
 			Token:    token,
 		}, model.ErrorResponse{}
 	}
+	walletJSON, _ := json.Marshal(wallet)
+	service.RedisService.Set(fmt.Sprint(wallet.ID), string(walletJSON), time.Hour*1)
 	return model.AuthenticateResponse{}, ErrorResponse(401, "Invalid Credentials", err.Error())
 }
 
@@ -127,5 +136,12 @@ func (service *WalletService) changeBalance(wallet *entity.Wallet, amount decima
 	if err := service.BaseService.walletRepository.Update(fmt.Sprint(wallet.ID), &wallet); err != nil {
 		return err
 	}
+	err := service.RedisService.Clear(fmt.Sprint(wallet.ID))
+	if err != nil {
+		service.Logger.Error("Could not clear cache for wallet %s: %v", wallet.Username, err)
+	}
+
+	walletJSON, _ := json.Marshal(wallet)
+	service.RedisService.Set(fmt.Sprint(wallet.ID), string(walletJSON), time.Hour*1)
 	return nil
 }
