@@ -52,6 +52,10 @@ func NewApp() *App {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
+	err = storage.SeedData(db)
+	if err != nil {
+		log.Fatalf("Failed to seed data: %v", err)
+	}
 	// Initialize repositories and services
 	baseRepository := repository.NewBaseRepository(db)
 	walletRepository := repository.NewWalletRepository(baseRepository)

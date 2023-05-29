@@ -28,7 +28,7 @@ func InitConfig() (Config, error) {
 	var config Config
 	vp.SetConfigName("config")
 	vp.SetConfigType("json")
-	vp.AddConfigPath("./framework/config")
+	vp.AddConfigPath("framework/config")
 
 	err := vp.ReadInConfig()
 

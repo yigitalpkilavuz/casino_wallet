@@ -5,12 +5,12 @@
   },
   "database": {
     "storageType" : "mysql",
-    "connectionString": "root:123456@tcp(127.0.0.1:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local",
-    "localConnectionString" : "root:password@tcp(mysql:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local"
+    "localConnectionString": "root:123456@tcp(127.0.0.1:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local",
+    "ConnectionString" : "root:my-secret-pw@tcp(mysql:3306)/wallet_service?charset=utf8mb4&parseTime=True&loc=Local"
   },
   "redis" :{
-    "host": "redis-11439.c135.eu-central-1-1.ec2.cloud.redislabs.com:11439",
-    "Password": "AwPdd4Nj6699dJHWiNTIHiuABc5roqST",
+    "host": "redis:6379",
+    "Password": "",
     "db": 0
   },
   "authorization":{

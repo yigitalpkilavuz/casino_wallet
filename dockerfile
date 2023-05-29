@@ -1,8 +1,8 @@
 # Start from a Debian based image with Go installed
-FROM golang:1.17 as builder
+FROM golang:1.18 as builder
 
 # Add Maintainer Info
-LABEL maintainer="Your Name <youremail@domain.com>"
+LABEL maintainer="Your Name <yigitalpkilavuz@gmail.com>"
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -28,6 +28,10 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
+
+# Copy the config
+COPY ./framework/config/config.json /root/framework/config/config.json
+
 
 # This container exposes port 8080 to the outside world
 EXPOSE 8080

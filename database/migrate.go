@@ -13,11 +13,10 @@ func RunMigrations(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	insertTestData(db)
 	return nil
 }
 
-func insertTestData(db *gorm.DB) {
+func SeedData(db *gorm.DB) error {
 	wallets := []entity.Wallet{
 		{Username: "User1", Password: "password1", Balance: decimal.NewFromFloat(1000.0)},
 		{Username: "User2", Password: "password2", Balance: decimal.NewFromFloat(2000.0)},
@@ -63,4 +62,5 @@ func insertTestData(db *gorm.DB) {
 			}
 		}
 	}
+	return nil
 }
