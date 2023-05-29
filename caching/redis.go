@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/yigitalpkilavuz/casino_wallet/config"
+	"github.com/yigitalpkilavuz/casino_wallet/framework/config"
 )
 
 type RedisService struct {

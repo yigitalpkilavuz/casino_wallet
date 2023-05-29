@@ -9,9 +9,9 @@ import (
 	controller "github.com/yigitalpkilavuz/casino_wallet/api/controllers"
 	middleware "github.com/yigitalpkilavuz/casino_wallet/api/middlewares"
 	"github.com/yigitalpkilavuz/casino_wallet/caching"
-	config "github.com/yigitalpkilavuz/casino_wallet/config"
 	storage "github.com/yigitalpkilavuz/casino_wallet/database"
-	logger "github.com/yigitalpkilavuz/casino_wallet/log"
+	config "github.com/yigitalpkilavuz/casino_wallet/framework/config"
+	logger "github.com/yigitalpkilavuz/casino_wallet/framework/log"
 	repository "github.com/yigitalpkilavuz/casino_wallet/repositories"
 	service "github.com/yigitalpkilavuz/casino_wallet/services"
 )
@@ -24,7 +24,7 @@ type App struct {
 	TransactionRepository repository.TransactionRepository
 	BaseService           service.BaseService
 	RedisService          caching.RedisService
-	WalletService         service.WalletService
+	WalletService         service.IWalletService
 	WalletController      controller.WalletController
 }
 
@@ -52,7 +52,7 @@ func NewApp() *App {
 	baseService := service.NewBaseService(walletRepository, transactionRepository)
 	redisService := caching.NewRedisService(config)
 	walletService := service.NewWalletService(baseService, redisService, logger)
-	walletController := controller.NewWalletController(walletService)
+	walletController := controller.NewWalletController(&walletService)
 
 	return &App{
 		Config:                config,
@@ -62,7 +62,7 @@ func NewApp() *App {
 		TransactionRepository: transactionRepository,
 		BaseService:           baseService,
 		RedisService:          redisService,
-		WalletService:         walletService,
+		WalletService:         &walletService,
 		WalletController:      walletController,
 	}
 }

@@ -10,8 +10,16 @@ import (
 	auth "github.com/yigitalpkilavuz/casino_wallet/auth"
 	"github.com/yigitalpkilavuz/casino_wallet/caching"
 	entity "github.com/yigitalpkilavuz/casino_wallet/database/entities"
+	"github.com/yigitalpkilavuz/casino_wallet/models"
 	model "github.com/yigitalpkilavuz/casino_wallet/models"
 )
+
+type IWalletService interface {
+	Authenticate(req models.AuthenticateRequest) (models.AuthenticateResponse, models.ErrorResponse)
+	Balance(walletID string) (models.BalanceResponse, models.ErrorResponse)
+	Credit(req models.TransactionRequest) (models.TransactionResponse, models.ErrorResponse)
+	Debit(req models.TransactionRequest) (models.TransactionResponse, models.ErrorResponse)
+}
 
 type WalletService struct {
 	BaseService

@@ -7,10 +7,10 @@ import (
 )
 
 type WalletController struct {
-	walletService service.WalletService
+	walletService service.IWalletService
 }
 
-func NewWalletController(walletService service.WalletService) WalletController {
+func NewWalletController(walletService service.IWalletService) WalletController {
 	return WalletController{
 		walletService: walletService,
 	}
